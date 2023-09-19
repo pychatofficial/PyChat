@@ -1,0 +1,40 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest aiohttp aiohttp-retry aiosignal appdirs argon-cffi argon-cffi-bindings async-timeout attrs automat beautifulsoup bitdust bs cachecontrol cachetools cachy certifi cffi charset-normalizer chatterbot chatterbot-corpus chatterbot-voice cleo click clikit constantly crashtest cryptography debugpy deprecated distlib docopt filelock firebase firebase-admin firestore flask frozenlist future gax-google-logging-v gax-google-pubsub-v gcloud google-api-core google-api-python-client google-auth google-auth-httplib google-cloud-core google-cloud-firestore google-cloud-storage google-crcc google-gax google-resumable-media googleapis-common-protos grpc-google-logging-v grpc-google-pubsub-v grpcio grpcio-status htmllib httplib hyperlink idna incremental iso itsdangerous jedi jeepney jinja joblib jsondatabase jwcrypto jws keyring lockfile markupsafe msgpack multidict nltk numwords numpy oauthclient oauthlib openai packaging parso passlib pastel pexpect pip pkginfo platformdirs pluggy ply poetry poetry-core proto-plus protobuf psutil ptyprocess pyasn pyasn-modules pycparser pycryptodome pycryptodomex pyflakes pyhamcrest pyjwt pylev pymongo pyparsing pyrebase pyseto python-jwt python-lsp-jsonrpc python-twitter pytoolconfig regex replit replit-python-lsp-server requests requests-oauthlib requests-toolbelt rope rsa scratchattach secretstorage service-identity setuptools shellingham post six soupsieve speechrecognition sqlalchemy toml tomli tomlkit tqdm twisted typing-extensions ujson uritemplate urllib virtualenv webencodings websocket-client werkzeug whatthepatch wrapt xds-protos yapf yarl zope-interface
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest
